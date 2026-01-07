@@ -68,6 +68,8 @@ Hopefully you see this!
 
 
 Now can we see the copied files in your folder? list.files in r is analogous to ls in bash.
+=======
+Now can we see the copied files in your folder? *list.files* in r is analagous to *ls* in bash.
 ```r
 list.files(pattern=".gz")
 ```
@@ -103,6 +105,7 @@ dev.off()
 ```
 Download these files to your local system. They should look like the below example. 
 
+![](plots/qualityplot.png)
 
 In gray-scale is a heat map of the frequency of each quality score at each base position. The mean quality score at each position is shown by the green line, and the quartiles of the quality score distribution by the orange lines. The red line shows the scaled proportion of reads that extend to at least that position
 You can (hopefully) see that the quality remains above 35 for the entire read across both the forward and reverse read.  
@@ -127,6 +130,7 @@ head(out)
 > Some input samples had no reads pass the filter.
 > 
 >                            reads.in reads.out
+>  reads.in reads.out
 > 
 > BAR-1_R1_stripped.fastq.gz    111507    111290
 > 
@@ -267,6 +271,8 @@ dim(seqtab)
 write.csv(t(seqtab),"outputTable.csv")
 ```
 > [1]   4 242
+
+What do these numbers mean? They are produced by the *dim* function.
 
 ### 2.6 What is in the data? 
 Great now you should have a .csv file you can download and interpret! Can you answer the below questions?
