@@ -25,21 +25,23 @@ BLAST (Basic Local Alignment Search Tool) is a bioinformatics toolkit that...
 
 You can use these tools interactively on the above USA-hosted website (for now...), but all are avalible as standalone tools to use on servers yourself (e.g. blastn for nucleotide queries).
 
-### Questions to consider
+### Questions to consider for each sequence
 
 - What genetic region do we think this is?  
-- Is it from the nuclear, mitochondrial, chloroplast or another organelle?  
+- Is it from the nuclear genome, mitochondrial, chloroplast or another organelle genome?  
 - What is the taxa with the single highest score?  
 - Are there any similar hits but for different species?  
 - Are there any hits with low coverage (<90%)?  
 - Are there multiple genetic variants (haplotypes) for the same species?
-#### For each sequence write down which taxa you think the sequence came from?
+#### For each sequence which taxa you think the sequence came from?
+
+### Discussion in plenum 
 
 ---
 
 # Part 2 Metabarcoding Bioinformatics
 
-### How do we go from read pairs to a sequence x sample table?
+### How do we go from read pairs to a sequence by sample table?
 
 #### First log into the server as normal
 
@@ -49,13 +51,13 @@ echo '.libPaths(c("/home/ctools/R_libs", .libPaths()))' >> ~/.Rprofile
 ```
 Now make a folder and copy raw files into a directory in which you wnat to work
 ```bash
-cp /home/projects/MTBexercise *.gz /your/directory/here/
+cp /home/projects/MTBexercise/*.gz /your/directory/here/
 ```
-Great, now we enter R for the rest of our analysis  
+Great, now we enter R for the rest of our analysis. A little cheatsheet/reminder on R [here](https://www.rforecology.com/uploads/The_essential_R_Cheatsheet_v1_0.pdf).  
 ```r
 R
 ```
-
+### 2.1 Setting things up
 Let's try and load the libraries
 ```r
 library(dada2)
@@ -65,7 +67,7 @@ Hopefully you see this!
 >[1] ‘1.30.0’
 
 
-Verify files
+Now can we see the copied files in your folder? list.files in r is analagous to ls in bash.
 ```r
 list.files(pattern=".gz")
 ```
@@ -112,7 +114,7 @@ filtRs <- file.path("filtered", paste0(sample.names, "_R_filt.fastq.gz"))
 names(filtFs) <- sample.names
 names(filtRs) <- sample.names
 ```
-
+### 2.2 Filtering bad reads
 We use the filterAndTrim function to retain a subset of the reads. Look at the [documentation](https://rdrr.io/bioc/dada2/man/filterAndTrim.html) to understand the parameters. 
 ```r
 out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs,
@@ -121,7 +123,8 @@ out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs,
 head(out)
 ```
 
-### Learn errors
+### 2.3 Learning errors
+dada2 works by calculating an error model unique to each seqeuneced DNA library. It then uses this error model to determine which sequences are real and which are artificts (for e.g. PCR errors or sequencing errors). There is plenty we can do to visualise the error models and refine them, but here we just want to try and go through the pipeline so we assume things are ok and move on. 
 ```r
 path <- "filtered"
 filtFs <- sort(list.files(path, pattern="F_filt.fastq.gz", full.names = TRUE))
@@ -130,8 +133,10 @@ filtRs <- sort(list.files(path, pattern="R_filt.fastq.gz", full.names = TRUE))
 errF <- learnErrors(filtFs, multithread=4)
 errR <- learnErrors(filtRs, multithread=4)
 ```
+***Optional*** Look at the [documentation](https://www.rdocumentation.org/packages/dada2/versions/1.0.3/topics/plotErrors) for the plotErrors function if you are interested in interrogating the error profiles. You can generate plots just like you did for the quality plots so give it a go, what can you see?        
 
-### Dereplicate
+### 2.4 Dereplicate and DADA2
+Next we dereplicate our samples
 ```r
 derepFs <- derepFastq(list.files("filtered", pattern="F_filt.fastq.gz", full.names = TRUE), verbose=TRUE)
 derepRs <- derepFastq(list.files("filtered", pattern="R_filt.fastq.gz", full.names = TRUE), verbose=TRUE)
@@ -139,20 +144,19 @@ derepRs <- derepFastq(list.files("filtered", pattern="R_filt.fastq.gz", full.nam
 names(derepFs) <- sapply(strsplit(basename(list.files("filtered", pattern="F_filt.fastq.gz", full.names = TRUE)), "_"), `[`, 1)
 names(derepRs) <- sapply(strsplit(basename(list.files("filtered", pattern="R_filt.fastq.gz", full.names = TRUE)), "_"), `[`, 1)
 ```
-
-### Infer sample composition
+...and feed the dereplicated data and our error models into the dada2 alogorithm.
 ```r
 dadaFs <- dada(derepFs, err=errF, multithread=4)
 dadaRs <- dada(derepRs, err=errR, multithread=4)
 ```
 
-### Merge pairs
+### 2.5 Merge and output 
+So far all our processing has been on the forward and reverse reads seperately. Now we have some good quality sequences for each direction we can merge them.
 ```r
 mergers <- mergePairs(dadaFs, derepFs, dadaRs, derepRs, verbose=TRUE)
 head(mergers[[1]])
 ```
-
-### Make sequence table and write output
+Now we make a sequence table, look at the dimentions and output a csv file for further interrogation.
 ```r
 seqtab <- makeSequenceTable(mergers)
 dim(seqtab)
