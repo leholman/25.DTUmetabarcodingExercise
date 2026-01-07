@@ -67,9 +67,11 @@ Hopefully you see this!
 >[1] ‘1.30.0’
 
 
+<<<<<<< HEAD
 Now can we see the copied files in your folder? list.files in r is analogous to ls in bash.
 =======
 Now can we see the copied files in your folder? *list.files* in r is analagous to *ls* in bash.
+>>>>>>> f628473dd5bc4d9472968f7c3e152dc3414c010d
 ```r
 list.files(pattern=".gz")
 ```
@@ -104,7 +106,6 @@ plotQualityProfile(fnRs[4:5])
 dev.off()
 ```
 Download these files to your local system. They should look like the below example. 
-
 ![](plots/qualityplot.png)
 
 In gray-scale is a heat map of the frequency of each quality score at each base position. The mean quality score at each position is shown by the green line, and the quartiles of the quality score distribution by the orange lines. The red line shows the scaled proportion of reads that extend to at least that position
@@ -129,7 +130,6 @@ head(out)
 > 
 > Some input samples had no reads pass the filter.
 > 
->                            reads.in reads.out
 >  reads.in reads.out
 > 
 > BAR-1_R1_stripped.fastq.gz    111507    111290
