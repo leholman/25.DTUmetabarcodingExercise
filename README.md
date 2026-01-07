@@ -88,7 +88,7 @@ Next we split the name up and assign the names with no suffix to a variable & ch
 sample.names <- sapply(strsplit(basename(fnFs), "_"), "[", 1)
 sample.names
 ```
-
+> [1] "BAR-1"  "C1"     "C2"     "CHAM-1" "RED-1"
 We then make two plots that show us how many reads we have, what quality they are, and how they change across the NGS read.
 ```r
 pdf("qualityplot.F.pdf",width=8,height=5)
@@ -122,6 +122,22 @@ out <- filterAndTrim(fnFs, filtFs, fnRs, filtRs,
               compress=TRUE, multithread=4)
 head(out)
 ```
+> The filter removed all reads: filtered/C1_F_filt.fastq.gz and filtered/C1_R_filt.fastq.gz not written.
+> 
+> Some input samples had no reads pass the filter.
+> 
+>                            reads.in reads.out
+> 
+> BAR-1_R1_stripped.fastq.gz    111507    111290
+> 
+> C1_R1_stripped.fastq.gz            0         0
+> 
+> C2_R1_stripped.fastq.gz            7         7
+> 
+> CHAM-1_R1_stripped.fastq.gz   182763    179686
+> 
+> RED-1_R1_stripped.fastq.gz    258557    258060
+
 
 ### 2.3 Learning errors
 dada2 works by calculating an error model unique to each seqeuneced DNA library. It then uses this error model to determine which sequences are real and which are artificts (for e.g. PCR errors or sequencing errors). There is plenty we can do to visualise the error models and refine them, but here we just want to try and go through the pipeline so we assume things are ok and move on. 
@@ -133,6 +149,10 @@ filtRs <- sort(list.files(path, pattern="R_filt.fastq.gz", full.names = TRUE))
 errF <- learnErrors(filtFs, multithread=4)
 errR <- learnErrors(filtRs, multithread=4)
 ```
+> 67696015 total bases in 549043 reads from 4 samples will be used for learning the error rates.
+> 
+> 67688492 total bases in 549043 reads from 4 samples will be used for learning the error rates.
+
 ***Optional*** Look at the [documentation](https://www.rdocumentation.org/packages/dada2/versions/1.0.3/topics/plotErrors) for the plotErrors function if you are interested in interrogating the error profiles. You can generate plots just like you did for the quality plots so give it a go, what can you see?        
 
 ### 2.4 Dereplicate and DADA2
@@ -144,21 +164,118 @@ derepRs <- derepFastq(list.files("filtered", pattern="R_filt.fastq.gz", full.nam
 names(derepFs) <- sapply(strsplit(basename(list.files("filtered", pattern="F_filt.fastq.gz", full.names = TRUE)), "_"), `[`, 1)
 names(derepRs) <- sapply(strsplit(basename(list.files("filtered", pattern="R_filt.fastq.gz", full.names = TRUE)), "_"), `[`, 1)
 ```
+>Dereplicating sequence entries in Fastq file: filtered/BAR-1_F_filt.fastq.gz
+>
+>Encountered 11280 unique sequences from 111290 total sequences read.
+>
+>Dereplicating sequence entries in Fastq file: filtered/C2_F_filt.fastq.gz
+>
+>Encountered 4 unique sequences from 7 total sequences read.
+>
+>Dereplicating sequence entries in Fastq file: filtered/CHAM-1_F_filt.fastq.gz
+>
+>Encountered 27980 unique sequences from 179686 total sequences read.
+>
+>Dereplicating sequence entries in Fastq file: filtered/RED-1_F_filt.fastq.gz
+>
+>Encountered 17095 unique sequences from 258060 total sequences read.
+>
+>Dereplicating sequence entries in Fastq file: filtered/BAR-1_R_filt.fastq.gz
+>
+>Encountered 12146 unique sequences from 111290 total sequences read.
+>
+>Dereplicating sequence entries in Fastq file: filtered/C2_R_filt.fastq.gz
+>
+>Encountered 4 unique sequences from 7 total sequences read.
+>
+>Dereplicating sequence entries in Fastq file: filtered/CHAM-1_R_filt.fastq.gz
+>
+>Encountered 26031 unique sequences from 179686 total sequences read.
+>
+>Dereplicating sequence entries in Fastq file: filtered/RED-1_R_filt.fastq.gz
+>
+>Encountered 22448 unique sequences from 258060 total sequences read.
+
 ...and feed the dereplicated data and our error models into the dada2 alogorithm.
 ```r
 dadaFs <- dada(derepFs, err=errF, multithread=4)
 dadaRs <- dada(derepRs, err=errR, multithread=4)
 ```
 
+>Sample 1 - 111290 reads in 11280 unique sequences.
+>
+>Sample 2 - 7 reads in 4 unique sequences.
+>
+>Sample 3 - 179686 reads in 27980 unique sequences.
+>
+>Sample 4 - 258060 reads in 17095 unique sequences.
+>
+>Sample 1 - 111290 reads in 12146 unique sequences.
+>
+>Sample 2 - 7 reads in 4 unique sequences.
+>
+>Sample 3 - 179686 reads in 26031 unique sequences.
+>
+>Sample 4 - 258060 reads in 22448 unique sequences.
+
 ### 2.5 Merge and output 
 So far all our processing has been on the forward and reverse reads seperately. Now we have some good quality sequences for each direction we can merge them.
 ```r
 mergers <- mergePairs(dadaFs, derepFs, dadaRs, derepRs, verbose=TRUE)
+```
+>109814 paired-reads (in 82 unique pairings) successfully merged out of 111019 (in 168 pairings) input.
+>
+>7 paired-reads (in 1 unique pairings) successfully merged out of 7 (in 1 pairings) input.
+>
+>164249 paired-reads (in 109 unique pairings) successfully merged out of 177525 (in 253 pairings) input.
+>
+>255689 paired-reads (in 116 unique pairings) successfully merged out of 257412 (in 200 pairings) input.
+
+```r
 head(mergers[[1]])
 ```
+>1        CACCGCGGTTATACGAGAGACCCAAGTAGATGGCCGCCGGCGTAAAGAGTGGTTTAGATGTGCCCCTACTAAAGCCAAATGACTTCAAAGCTGTCATACGCGCATGAATATACGAAGCCCAACCACGAAAGTGGCTTTAAAGCTCTGACTCCACGAAAGCTATGATA
+>
+>2     CACCGCGGTTATACGGGGGGCCCAAGTTGATAGAAGCCGGCGTAAAGGGTGGTTAAGAGCAAATTTAAAATTAGAGCCGAATGCTTTCCTGGCTGTTATACGCATCCGAAAGTAAGAAGTCCAATTACGAAAGTAGCTTTATATAATCTGAACCCACGAAAGCTAAGACA
+>
+>3      CACCGCGGTTATACGAGAGACCCAAGTGGATGGTCTTCGGCGTAAAGAGTGGTTAAGATAAAACCCAAAACTAAAGCCAAATAACTTCAAAGCTGTTATACGCGCATGAAGAAAAGAAACTCAACCACGAAAGTGGCTTTAAACCCCTGATTCCACGAAAGCTATGGTA
+>
+>4       CACCGCGGTTATACGAGAGGCCCAAATTGATAGTTAACGGCGTAAAGAGTGGTTAAAAGAGCCTATTACTAAAGCCGAACGCCTTCAAGGCTGTTATACGCACACCGAAGGTGAGAAGCCCACCCACGAAAGTGGCTTTACAACTTTGAATCCACGAAAGCTATGAAA
+>
+>5 CACCGCGGTTATACGAGAGGCCCAAGTTGATAAGCCCGGCGTAAAGAGTGGTTATGGATGAACCCCACACTAAAGCTAAAGACCCCCTAGGCTGTTATACGCACCTGGGGGCTCGAACCACCTATACGAAAGTAGCTTTACTCCCTTCCACCAGAACCCACGACAGCTGGGGCA
+>
+>6      CACCGCGGTTATACGAGAGGCCCAAGTTGACCGACACTCGGCGTAAAGAGTGGTTAAAAGAACCTAAAACTAAAGCCGAACGCCCTCACTACTGTTATACGTTTTCGAGGGTAAGAAGCCCTACTACGAAAGTGGCTTTACTAACATTGACCCCACGAAAGCTGTGAAA
+>
+>  abundance forward reverse nmatch nmismatch nindel prefer accept
+>
+>1     15002       2       1     80         0      0      2   TRUE
+>
+>2     13507       1       3     77         0      0      1   TRUE
+>
+>3     12329       3       2     77         0      0      2   TRUE
+>
+>4      9789       4       4     79         0      0      2   TRUE
+>
+>5      5304       6       6     73         0      0      1   TRUE
+>
+>6      5240       5       5     78         0      0      1   TRUE
+
 Now we make a sequence table, look at the dimentions and output a csv file for further interrogation.
 ```r
 seqtab <- makeSequenceTable(mergers)
 dim(seqtab)
 write.csv(t(seqtab),"outputTable.csv")
 ```
+> [1]   4 242
+
+### 2.6 What is in the data? 
+Great now you should have a .csv file you can download and interpret! Can you answer the below questions?
+- What is the most common sequence? What taxa does it belong to? Does this make sense? 
+- Are there any sequences in the control sample (C2)? If so what taxa does it come from? Does this make sense?
+- Can you see any differences between the most common sequence in each sample?
+- Which sample has the most unique sequences? 
+
+
+
+
+
