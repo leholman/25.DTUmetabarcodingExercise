@@ -66,12 +66,7 @@ packageVersion("dada2")
 Hopefully you see this!
 >[1] ‘1.30.0’
 
-
-<<<<<<< HEAD
-Now can we see the copied files in your folder? list.files in r is analogous to ls in bash.
-=======
 Now can we see the copied files in your folder? *list.files* in r is analagous to *ls* in bash.
->>>>>>> f628473dd5bc4d9472968f7c3e152dc3414c010d
 ```r
 list.files(pattern=".gz")
 ```
