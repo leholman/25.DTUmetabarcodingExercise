@@ -67,7 +67,7 @@ Hopefully you see this!
 >[1] ‘1.30.0’
 
 
-Now can we see the copied files in your folder? list.files in r is analagous to ls in bash.
+Now can we see the copied files in your folder? list.files in r is analogous to ls in bash.
 ```r
 list.files(pattern=".gz")
 ```
