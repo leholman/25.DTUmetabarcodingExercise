@@ -23,7 +23,7 @@ BLAST (Basic Local Alignment Search Tool) is a bioinformatics toolkit that...
 - Helps infer functional, evolutionary, or homology relationships between the query and known sequences.  ￼
 - Supports multiple search types (e.g., nucleotide vs nucleotide, protein vs protein, translated searches).  ￼
 
-You can use these tools interactively on the above USA-hosted website (for now...), but all are avalible as standalone tools to use on servers yourself (e.g. blastn for nucleotide queries).
+You can use these tools interactively on the above USA-hosted website (for now...), but all are available as standalone tools to use on servers yourself (e.g. blastn for nucleotide queries).
 
 ### Questions to consider for each sequence
 
@@ -33,7 +33,7 @@ You can use these tools interactively on the above USA-hosted website (for now..
 - Are there any similar hits but for different species?  
 - Are there any hits with low coverage (<90%)?  
 - Are there multiple genetic variants (haplotypes) for the same species?
-#### For each sequence which taxa you think the sequence came from?
+#### For each sequence which taxa do you think the sequence came from?
 
 ### Discussion in plenum 
 
@@ -140,7 +140,7 @@ head(out)
 
 
 ### 2.3 Learning errors
-dada2 works by calculating an error model unique to each seqeuneced DNA library. It then uses this error model to determine which sequences are real and which are artificts (for e.g. PCR errors or sequencing errors). There is plenty we can do to visualise the error models and refine them, but here we just want to try and go through the pipeline so we assume things are ok and move on. 
+dada2 works by calculating an error model unique to each sequenced DNA library. It then uses this error model to determine which sequences are real and which are artifacts (for e.g. PCR errors or sequencing errors). There is plenty we can do to visualise the error models and refine them, but here we just want to try and go through the pipeline so we assume things are ok and move on. 
 ```r
 path <- "filtered"
 filtFs <- sort(list.files(path, pattern="F_filt.fastq.gz", full.names = TRUE))
@@ -196,7 +196,7 @@ names(derepRs) <- sapply(strsplit(basename(list.files("filtered", pattern="R_fil
 >
 >Encountered 22448 unique sequences from 258060 total sequences read.
 
-...and feed the dereplicated data and our error models into the dada2 alogorithm.
+...and feed the dereplicated data and our error models into the dada2 algorithm.
 ```r
 dadaFs <- dada(derepFs, err=errF, multithread=4)
 dadaRs <- dada(derepRs, err=errR, multithread=4)
@@ -219,7 +219,7 @@ dadaRs <- dada(derepRs, err=errR, multithread=4)
 >Sample 4 - 258060 reads in 22448 unique sequences.
 
 ### 2.5 Merge and output 
-So far all our processing has been on the forward and reverse reads seperately. Now we have some good quality sequences for each direction we can merge them.
+So far all our processing has been on the forward and reverse reads separately. Now we have some good quality sequences for each direction we can merge them.
 ```r
 mergers <- mergePairs(dadaFs, derepFs, dadaRs, derepRs, verbose=TRUE)
 ```
@@ -260,7 +260,7 @@ head(mergers[[1]])
 >
 >6      5240       5       5     78         0      0      1   TRUE
 
-Now we make a sequence table, look at the dimentions and output a csv file for further interrogation.
+Now we make a sequence table, look at the dimensions and output a csv file for further interrogation.
 ```r
 seqtab <- makeSequenceTable(mergers)
 dim(seqtab)
